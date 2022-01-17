@@ -1,7 +1,7 @@
-from json.encoder import INFINITY
 import pygame
 import random
 import copy
+from AI import Minimax
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -10,13 +10,15 @@ def equal3(a, b, c):
     return (a == b and b == c and c == a and a != '.')
 
 class Player:
-    def __init__(self, isAI):
+    def __init__(self, key, isAI):
         self.isAI = isAI
+        if isAI:
+            self.AI = Minimax(3, 3, key)
 
 class Game:
     def __init__(self):
-        self.player = {'O':Player(isAI=False), 'X':Player(isAI=True)}
-        self.turn = 'O'
+        self.player = {'O':Player('O', isAI=True), 'X':Player('X', isAI=False)}
+        self.turn = 'X'
 
         self.rows = 3
         self.cols = 3
@@ -67,36 +69,6 @@ class Game:
 
         return winner
     
-    def getScore(self, board, agent, enemy):
-        winner = None
-        for i in range(self.rows):
-            if equal3(board[i][0], board[i][1], board[i][2]):
-                winner = board[i][0]
-        
-        if winner == None:
-            for i in range(self.cols):
-                if equal3(board[0][i], board[1][i], board[2][i]):
-                    winner = board[0][i]
-
-        if winner == None:
-            if equal3(board[0][0], board[1][1], board[2][2]):
-                winner = board[0][0]
-
-            elif equal3(board[0][2], board[1][1], board[2][0]):
-                winner = board[0][2]
-
-            else:
-                if self.blank_cnt == 0:
-                    winner = 'Tie'
-
-        if winner == agent:
-            return 100
-        elif winner == enemy:
-            return -100
-        elif winner == 'Tie':
-            return 0
-        else:
-            return None
     
     def putdown(self, spot):
         r, c = spot
@@ -109,78 +81,30 @@ class Game:
             print("Cannot putdown at", spot)
             return False
 
-    def maxAgent(self, board, agent, enemy, depth, maxdepth):
-        if depth >= maxdepth:
-            return 0
-        else:
-            score = self.getScore(board, agent, enemy)
-            if score != None:
-                return score
-        
-        # not game end
-        maxscore = -INFINITY
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if board[i][j] == '.':
-                    newboard = copy.deepcopy(board)
-                    newboard[i][j] = agent
-                    score = self.minAgent(newboard, agent, enemy, depth + 1, maxdepth)
-                    if score > maxscore:
-                        maxscore = score
-        
-        return maxscore
-
-    def minAgent(self, board, agent, enemy, depth, maxdepth):
-        if depth >= maxdepth:
-            return 0
-        else:
-            score = self.getScore(board, agent, enemy)
-            if score != None:
-                return score
-        
-        # not game end
-        minscore = INFINITY
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if board[i][j] == '.':
-                    newboard = copy.deepcopy(board)
-                    newboard[i][j] = enemy
-                    score = self.maxAgent(newboard, agent, enemy, depth + 1, maxdepth)
-                    if score < minscore:
-                        minscore = score
-        
-        return minscore
-
     def get_spot(self):
         if self.player[self.turn].isAI:
+
+            """
+            # use AI algorithm - random pick
             blanks = []
             for i in range(self.rows):
                 for j in range(self.cols):
                     if self.board[i][j] == '.':
                         blanks.append([i, j])
-            """
-            # use AI algorithm - random pick
             idx = random.randrange(0, len(blanks))
             return blanks[idx]
             """
-
             # use AI algorithm - Minimax Algorithm
-            maxdepth = 3
-            maxscore = -INFINITY
-            maxspot = None
-            if self.turn == 'O':
-                enemy = 'X'
-            else:
-                enemy = 'O'
-            for spot in blanks:
-                newboard = copy.deepcopy(self.board)
-                newboard[spot[0]][spot[1]] = self.turn
-                score = self.minAgent(newboard, self.turn, enemy, 0, maxdepth)
-                if score > maxscore:
-                    maxspot = spot
-                    maxscore = score
-
-            return maxspot
+            AI = self.player[self.turn].AI
+            v = -100000000
+            spot = None
+            for act in AI.actions(self.board):
+                score = AI.maxAgent(AI.result(self.board, act))
+                if score > v:
+                    v = score
+                    spot = act
+                    print(v, spot)
+            return spot
             
         else:
             # Human Player
@@ -228,7 +152,7 @@ class Game:
 
         self.drawBoard()
         
-        while True:
+        while not self.gameEnd:
             pygame.display.flip()
             
             spot = self.get_spot()
