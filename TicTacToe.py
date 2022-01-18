@@ -1,7 +1,7 @@
 import pygame
 import random
 import copy
-from AI import Minimax
+from AI import *
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -13,11 +13,13 @@ class Player:
     def __init__(self, key, isAI):
         self.isAI = isAI
         if isAI:
+            # Choose AI Algorithm
+            #self.AI = Minimax(3, 3, key)
             self.AI = Minimax(3, 3, key)
-
+            
 class Game:
     def __init__(self):
-        self.player = {'O':Player('O', isAI=True), 'X':Player('X', isAI=False)}
+        self.player = {'O':Player('O', isAI=False), 'X':Player('X', isAI=True)}
         self.turn = 'X'
 
         self.rows = 3
@@ -94,16 +96,8 @@ class Game:
             idx = random.randrange(0, len(blanks))
             return blanks[idx]
             """
-            # use AI algorithm - Minimax Algorithm
-            AI = self.player[self.turn].AI
-            v = -100000000
-            spot = None
-            for act in AI.actions(self.board):
-                score = AI.maxAgent(AI.result(self.board, act))
-                if score > v:
-                    v = score
-                    spot = act
-                    print(v, spot)
+            # use AI algorithm
+            spot = self.player[self.turn].AI.get_spot(self.board)
             return spot
             
         else:
