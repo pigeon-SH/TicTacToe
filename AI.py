@@ -7,14 +7,6 @@ INFINITY = 1000000000
 def equal3(a, b, c):
     return (a == b and b == c and c == a and a != '.')
 
-#################################################
-# TODO:                                         #
-#   AI choose to lose even if it can be Tied.   #
-#   Why does this happen?                       #
-#################################################
-
-
-
 class Minimax:
     def __init__(self, rows, cols, my):
         self.rows = rows
@@ -128,11 +120,11 @@ class Minimax:
         v = -INFINITY
         spot = None
         for act in self.actions(state):
-            score = self.maxAgent(self.result(state, act))
+            score = self.minAgent(self.result(state, act))
             if score > v:
                 v = score
                 spot = act
-                print(v, spot)
+
         return spot
 
 class AlphaBeta:
@@ -258,7 +250,7 @@ class AlphaBeta:
         beta = INFINITY
         spot = None
         for act in self.actions(state):
-            score = self.maxAgent(self.result(state, act), alpha, beta)
+            score = self.minAgent(self.result(state, act), alpha, beta)
             if score > v:
                 v = score
                 spot = act
@@ -266,7 +258,7 @@ class AlphaBeta:
                 alpha = v
                 if alpha >= beta:
                     break
-        print("score:", score)
+
         return spot
 
 class MCTS:

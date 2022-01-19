@@ -15,7 +15,7 @@ class Player:
         if isAI:
             # Choose AI Algorithm
             #self.AI = Minimax(3, 3, key)
-            self.AI = Minimax(3, 3, key)
+            self.AI = AlphaBeta(3, 3, key)
             
 class Game:
     def __init__(self):
