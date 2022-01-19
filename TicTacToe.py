@@ -1,6 +1,4 @@
 import pygame
-import random
-import copy
 from AI import *
 
 BLACK = (0, 0, 0)
@@ -19,7 +17,7 @@ class Player:
             
 class Game:
     def __init__(self):
-        self.player = {'O':Player('O', isAI=False), 'X':Player('X', isAI=True)}
+        self.player = {'O':Player('O', isAI=True), 'X':Player('X', isAI=False)}
         self.turn = 'X'
 
         self.rows = 3
